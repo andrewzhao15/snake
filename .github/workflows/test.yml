@@ -1,0 +1,36 @@
+name: Run Tests
+
+on:
+  push:
+    branches: [ main, demo-branch ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r snake_game/requirements.txt
+        
+    - name: Run tests
+      working-directory: ./snake_game
+      run: |
+        python -m pytest
+        
+    - name: Upload coverage report
+      if: success()
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        fail_ci_if_error: false

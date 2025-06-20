@@ -14,6 +14,10 @@ GRID_SIZE = 20
 GRID_WIDTH = WINDOW_WIDTH // GRID_SIZE
 GRID_HEIGHT = WINDOW_HEIGHT // GRID_SIZE
 
+# High score file
+import os
+HIGH_SCORE_FILE = os.path.join(os.path.dirname(__file__), 'highscore.txt')
+
 # Difficulty settings (frames per second)
 DIFFICULTIES = {
     'Easy': 8,
@@ -28,6 +32,11 @@ RED = (255, 0, 0)
 WHITE = (255, 255, 255)
 
 def spawn_food(snake_body):
+    """Spawn food at a random position not occupied by the snake."""
+    # Check if board is full
+    if len(snake_body) >= GRID_WIDTH * GRID_HEIGHT:
+        raise ValueError("No space left to spawn food")
+        
     while True:
         food = (random.randint(0, GRID_WIDTH - 1),
                 random.randint(0, GRID_HEIGHT - 1))
@@ -89,20 +98,30 @@ class Snake:
             self.length += 1
 
     def draw(self, screen):
-        for segment in self.body:
-            x, y = segment
-            rect = pygame.Rect(x * GRID_SIZE, y * GRID_SIZE, GRID_SIZE, GRID_SIZE)
-            pygame.draw.rect(screen, GREEN, rect)
+        for i, segment in enumerate(self.body):
+            # Draw head in a different color
+            color = (0, 200, 0) if i > 0 else (0, 255, 0)  # Darker green for body, bright green for head
+            pygame.draw.rect(screen, color,
+                           (segment[0] * GRID_SIZE, segment[1] * GRID_SIZE,
+                            GRID_SIZE - 1, GRID_SIZE - 1))
+
+    def check_collision(self):
+        """Check if the snake has collided with itself."""
+        if len(self.body) > 1:
+            return self.body[0] in list(self.body)[1:]
+        return False
 
 def load_high_score():
+    """Load the high score from file."""
     try:
-        with open('highscore.txt', 'r') as f:
+        with open(HIGH_SCORE_FILE, 'r') as f:
             return int(f.read())
-    except:
+    except (FileNotFoundError, ValueError):
         return 0
 
 def save_high_score(score):
-    with open('highscore.txt', 'w') as f:
+    """Save the high score to file."""
+    with open(HIGH_SCORE_FILE, 'w') as f:
         f.write(str(score))
 
 def main():
@@ -215,6 +234,10 @@ def main():
         
         # Control game speed based on difficulty
         clock.tick(DIFFICULTIES[snake.difficulty])
+
+# Make these available for testing
+__all__ = ['Snake', 'spawn_food', 'load_high_score', 'save_high_score',
+           'WINDOW_WIDTH', 'WINDOW_HEIGHT', 'GRID_SIZE', 'HIGH_SCORE_FILE']
 
 if __name__ == '__main__':
     main()
