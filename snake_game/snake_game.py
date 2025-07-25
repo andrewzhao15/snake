@@ -27,12 +27,6 @@ GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 WHITE = (255, 255, 255)
 
-def spawn_food(snake_body):
-    while True:
-        food = (random.randint(0, GRID_WIDTH - 1),
-                random.randint(0, GRID_HEIGHT - 1))
-        if food not in snake_body:
-            return food
 
 # Set up the game window
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
